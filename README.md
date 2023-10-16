@@ -22,3 +22,4 @@
 4. Прогрессбар на просмотр
 5. Оценка ползунок
 6. Картинки ?
+![3D_Animation_Style_cute_fluffy_alien_in_the_control_panel_of_t_1](https://github.com/Kirin112/serialbd/assets/136063840/81606730-0082-484d-9f14-5217eacdf510)
