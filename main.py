@@ -1,7 +1,8 @@
 import sys
 import sqlite3
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QStackedWidget, QPushButton, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QStackedWidget, QPushButton, QLineEdit, QMessageBox, QTableWidgetItem
 from PyQt5.uic import loadUi
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
             new_year = self.lineEdit_5.text()
             new_country = self.lineEdit_6.text()
             new_score = self.horizontalSlider.value()
-
+            #sex
             name = self.lineEdit.text()
 
             cursor.execute("""UPDATE serials
