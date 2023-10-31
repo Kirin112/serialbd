@@ -1,7 +1,8 @@
 import sys
 import sqlite3
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTabWidget, QStackedWidget, QPushButton, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QTableWidget, QTableView, QStackedWidget, QPushButton, QLineEdit, QMessageBox, QTableWidgetItem
 from PyQt5.uic import loadUi
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -11,6 +12,8 @@ class MainWindow(QMainWindow):
         self.pushButton.clicked.connect(self.add_serial)
         self.pushButton_3.clicked.connect(self.delete_serial)
         self.pushButton_4.clicked.connect(self.update_serial)
+
+        self.show_serials()
 
     def add_serial(self):
         try:
@@ -64,6 +67,30 @@ class MainWindow(QMainWindow):
 
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при обновлении данных в базе данных: {e}")
+
+        finally:
+            cursor.close()
+
+    def show_serials(self):
+        try:
+            cursor = self.con.cursor()
+            cursor.execute("SELECT * FROM serials")
+            serials = cursor.fetchall()
+
+            self.tableWidget_2.setRowCount(len(serials))
+            self.tableWidget_2.setColumnCount(7)  # количество столбцов в таблице (название, жанр, эпизоды, сезоны, год, страна, рейтинг)
+
+            # Устанавливаем заголовки столбцов
+            self.tableWidget_2.setHorizontalHeaderLabels(["Название", "Жанр", "Эпизоды", "Сезоны", "Год", "Страна", "Рейтинг"])
+
+            # Заполняем таблицу данными
+            for row, serial in enumerate(serials):
+                for col, data in enumerate(serial):
+                    item = QTableWidgetItem(str(data))
+                    self.tableWidget_2.setItem(row, col, item)
+
+        except sqlite3.Error as e:
+            print("Произошла ошибка при получении данных из базы данных:", e)
 
         finally:
             cursor.close()
