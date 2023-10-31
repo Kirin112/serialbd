@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1099</width>
-    <height>670</height>
+    <width>1112</width>
+    <height>665</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,32 +79,6 @@
       </property>
       <item>
        <property name="text">
-        <string>Добавить</string>
-       </property>
-       <property name="font">
-        <font>
-         <family>MS Shell Dlg 2</family>
-         <pointsize>16</pointsize>
-        </font>
-       </property>
-       <property name="textAlignment">
-        <set>AlignCenter</set>
-       </property>
-       <property name="background">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>171</green>
-          <blue>228</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="flags">
-        <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>Список сериалов</string>
        </property>
        <property name="font">
@@ -130,6 +104,54 @@
         </brush>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>Запланировано</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+       <property name="background">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>0</red>
+          <green>171</green>
+          <blue>228</blue>
+         </color>
+        </brush>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Настройки</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>MS Shell Dlg 2</family>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+       <property name="background">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>0</red>
+          <green>171</green>
+          <blue>228</blue>
+         </color>
+        </brush>
+       </property>
+       <property name="flags">
+        <set>ItemIsSelectable|ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+       </property>
+      </item>
      </widget>
     </item>
     <item>
@@ -138,8 +160,10 @@
        <bool>false</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
+      <widget class="QWidget" name="page_2"/>
+      <widget class="QWidget" name="page_3"/>
       <widget class="QWidget" name="page">
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
@@ -314,8 +338,11 @@
           </item>
          </layout>
         </item>
-        <item row="0" column="1">
+        <item row="1" column="0">
          <layout class="QFormLayout" name="formLayout_6">
+          <property name="topMargin">
+           <number>100</number>
+          </property>
           <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="label_19">
             <property name="font">
@@ -350,12 +377,8 @@
           </item>
          </layout>
         </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_2">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QTableWidget" name="tableWidget"/>
+        <item row="0" column="1" rowspan="2">
+         <widget class="QTableWidget" name="tableWidget_2"/>
         </item>
        </layout>
       </widget>
@@ -368,11 +391,19 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1099</width>
+     <width>1112</width>
      <height>26</height>
     </rect>
    </property>
   </widget>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -387,8 +418,8 @@
      <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>715</x>
-     <y>48</y>
+     <x>649</x>
+     <y>85</y>
     </hint>
    </hints>
   </connection>
@@ -399,12 +430,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>520</x>
-     <y>515</y>
+     <x>636</x>
+     <y>354</y>
     </hint>
     <hint type="destinationlabel">
-     <x>365</x>
-     <y>459</y>
+     <x>363</x>
+     <y>377</y>
     </hint>
    </hints>
   </connection>
