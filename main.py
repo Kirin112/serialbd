@@ -18,20 +18,24 @@ class MainWindow(QMainWindow):
         self.page_2 = self.stackedWidget.findChild(QWidget, 'page_2')
         self.layout_page_2 = QVBoxLayout(self.page_2)
 
-        # Создаем QScrollArea и устанавливаем QVBoxLayout внутри него
+
         self.scroll_area = QScrollArea(self.page_2)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout(self.scroll_widget)
         self.scroll_area.setWidget(self.scroll_widget)
-
-        # Устанавливаем QScrollArea вместо layout_page_2 на странице page_2
         self.layout_page_2.addWidget(self.scroll_area)
 
-        # Добавляем чекбоксы на страницу page_2
+
         self.add_checkboxes_to_page()
 
     def add_checkboxes_to_page(self):
+        for i in reversed(range(self.scroll_layout.count())):
+            widget = self.scroll_layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+        self.layout_page_2.addWidget(self.scroll_area)
+
         try:
             cursor = self.con.cursor()
             cursor.execute("SELECT id, name FROM serials")
@@ -90,6 +94,7 @@ class MainWindow(QMainWindow):
 
     def add_serial(self):
         try:
+
             cursor = self.con.cursor()
             result = cursor.execute("SELECT id FROM genres WHERE name = ?", (self.comboBox.currentText(),)).fetchall()
             cursor.execute("""INSERT INTO
@@ -100,7 +105,7 @@ class MainWindow(QMainWindow):
             print("Данные успешно добавлены в базу данных!")
             QMessageBox.information(self, "Успех", "Данные успешно добавлены в базу данных!")
             self.show_serials()
-
+            self.add_checkboxes_to_page()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при добавлении данных в базу данных: {e}")
         finally:
@@ -115,6 +120,7 @@ class MainWindow(QMainWindow):
             print(f"Запись с названием '{name}' успешно удалена из базы данных!")
             QMessageBox.information(self, "Успех", f"Запись с названием '{name}' успешно удалена из базы данных!")
             self.show_serials()
+            self.add_checkboxes_to_page()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при удалении данных из базы данных: {e}")
         finally:
@@ -141,7 +147,7 @@ class MainWindow(QMainWindow):
             print(f"Запись с названием '{name}' успешно обновлена в базе данных!")
             QMessageBox.information(self, "Успех", f"Запись с названием '{name}' успешно обновлена в базе данных!")
             self.show_serials()
-
+            self.add_checkboxes_to_page()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при обновлении данных в базе данных: {e}")
 
