@@ -14,21 +14,15 @@ class MainWindow(QMainWindow):
         self.pushButton.clicked.connect(self.add_serial)
         self.pushButton_3.clicked.connect(self.delete_serial)
         self.pushButton_4.clicked.connect(self.update_serial)
-
         self.show_serials()
-
         self.page_2 = self.stackedWidget.findChild(QWidget, 'page_2')
         self.layout_page_2 = QVBoxLayout(self.page_2)
-
-
         self.scroll_area = QScrollArea(self.page_2)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_widget = QWidget()
         self.scroll_layout = QVBoxLayout(self.scroll_widget)
         self.scroll_area.setWidget(self.scroll_widget)
         self.layout_page_2.addWidget(self.scroll_area)
-
-
         self.add_checkboxes_to_page()
 
     def add_checkboxes_to_page(self):
