@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
                         image_data = f.read()
                 pixmap = QPixmap()
                 pixmap.loadFromData(image_data)
-                image_label.setPixmap(pixmap.scaled(250, 400, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
+                image_label.setPixmap(pixmap.scaled(200, 400, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
                 serial_layout.addWidget(image_label)
 
                 # Добавляем информацию о сериале
