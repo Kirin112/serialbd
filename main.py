@@ -14,6 +14,8 @@ class MainWindow(QMainWindow):
         self.pushButton.clicked.connect(self.add_serial)
         self.pushButton_3.clicked.connect(self.delete_serial)
         self.pushButton_4.clicked.connect(self.update_serial)
+
+        #list of serials
         self.show_serials()
         self.page_2 = self.stackedWidget.findChild(QWidget, 'page_2')
         self.layout_page_2 = QVBoxLayout(self.page_2)
@@ -23,9 +25,9 @@ class MainWindow(QMainWindow):
         self.scroll_layout = QVBoxLayout(self.scroll_widget)
         self.scroll_area.setWidget(self.scroll_widget)
         self.layout_page_2.addWidget(self.scroll_area)
-        self.add_checkboxes_to_page()
+        self.add_checkboxes_to_page_2()
 
-    def add_checkboxes_to_page(self):
+    def add_checkboxes_to_page_2(self):
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget is not None:
@@ -43,9 +45,17 @@ class MainWindow(QMainWindow):
                 checkbox_watched = QCheckBox("Просмотрено")
                 checkbox_watching = QCheckBox("Смотрю")
 
+
                 checkbox_planned.serial_id = serial_id
                 checkbox_watched.serial_id = serial_id
                 checkbox_watching.serial_id = serial_id
+
+                if self.is_serial_in_planned(serial_id):
+                    checkbox_planned.setChecked(True)
+                if self.is_serial_in_watched(serial_id):
+                    checkbox_watched.setChecked(True)
+                if self.is_serial_in_watching(serial_id):
+                    checkbox_watching.setChecked(True)
 
                 checkbox_planned.stateChanged.connect(self.checkbox_changed)
                 checkbox_watched.stateChanged.connect(self.checkbox_changed)
@@ -62,32 +72,80 @@ class MainWindow(QMainWindow):
         finally:
             cursor.close()
 
+    #
     def checkbox_changed(self, state):
         checkbox = self.sender()
         serial_id = checkbox.serial_id
 
         if checkbox.isChecked():
             if checkbox.text() == "Планирую посмотреть":
-                self.planned.append(serial_id)
+                self.add_to_table('planned', serial_id)
             elif checkbox.text() == "Просмотрено":
-                self.watched.append(serial_id)
+                self.add_to_table('watched', serial_id)
             elif checkbox.text() == "Смотрю":
-                self.watching.append(serial_id)
+                self.add_to_table('watching', serial_id)
         else:
             if checkbox.text() == "Планирую посмотреть":
-                self.planned.remove(serial_id)
+                self.remove_from_table('planned', serial_id)
             elif checkbox.text() == "Просмотрено":
-                self.watched.remove(serial_id)
+                self.remove_from_table('watched', serial_id)
             elif checkbox.text() == "Смотрю":
-                self.watching.remove(serial_id)
+                self.remove_from_table('watching', serial_id)
 
-        # Обновляем базу данных с новыми списками
-        cursor = self.con.cursor()
-        cursor.execute("UPDATE users SET planned=?, watched=?, watching=?", (
-        ",".join(map(str, self.planned)), ",".join(map(str, self.watched)), ",".join(map(str, self.watching))))
-        self.con.commit()
-        cursor.close()
+    def is_serial_in_planned(self, serial_id):
+        try:
+            cursor = self.con.cursor()
+            cursor.execute("SELECT idSerial FROM planned WHERE idSerial = ?", (serial_id,))
+            result = cursor.fetchone()
+            return result is not None
+        except sqlite3.Error as e:
+            print("Произошла ошибка при проверке planned:", e)
+        finally:
+            cursor.close()
 
+    def is_serial_in_watched(self, serial_id):
+        try:
+            cursor = self.con.cursor()
+            cursor.execute("SELECT idSerial FROM watched WHERE idSerial = ?", (serial_id,))
+            result = cursor.fetchone()
+            return result is not None
+        except sqlite3.Error as e:
+            print("Произошла ошибка при проверке planned:", e)
+        finally:
+            cursor.close()
+
+    def is_serial_in_watching(self, serial_id):
+        try:
+            cursor = self.con.cursor()
+            cursor.execute("SELECT idSerial FROM watching WHERE idSerial = ?", (serial_id,))
+            result = cursor.fetchone()
+            return result is not None
+        except sqlite3.Error as e:
+            print("Произошла ошибка при проверке planned:", e)
+        finally:
+            cursor.close()
+
+    def add_to_table(self, table_name, serial_id):
+        try:
+            cursor = self.con.cursor()
+            cursor.execute(f"INSERT INTO {table_name} (idSerial) VALUES (?)", (idSerial := serial_id,))
+            self.con.commit()
+        except sqlite3.Error as e:
+            print(f"Произошла ошибка при добавлении в таблицу {table_name}: {e}")
+        finally:
+            cursor.close()
+
+    def remove_from_table(self, table_name, serial_id):
+        try:
+            cursor = self.con.cursor()
+            cursor.execute(f"DELETE FROM {table_name} WHERE idSerial = ?", (serial_id,))
+            self.con.commit()
+        except sqlite3.Error as e:
+            print(f"Произошла ошибка при удалении из таблицы {table_name}: {e}")
+        finally:
+            cursor.close()
+
+    #settings
     def add_serial(self):
         try:
 
@@ -101,7 +159,7 @@ class MainWindow(QMainWindow):
             print("Данные успешно добавлены в базу данных!")
             QMessageBox.information(self, "Успех", "Данные успешно добавлены в базу данных!")
             self.show_serials()
-            self.add_checkboxes_to_page()
+            self.add_checkboxes_to_page_2()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при добавлении данных в базу данных: {e}")
         finally:
@@ -116,7 +174,7 @@ class MainWindow(QMainWindow):
             print(f"Запись с названием '{name}' успешно удалена из базы данных!")
             QMessageBox.information(self, "Успех", f"Запись с названием '{name}' успешно удалена из базы данных!")
             self.show_serials()
-            self.add_checkboxes_to_page()
+            self.add_checkboxes_to_page_2()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при удалении данных из базы данных: {e}")
         finally:
@@ -143,7 +201,7 @@ class MainWindow(QMainWindow):
             print(f"Запись с названием '{name}' успешно обновлена в базе данных!")
             QMessageBox.information(self, "Успех", f"Запись с названием '{name}' успешно обновлена в базе данных!")
             self.show_serials()
-            self.add_checkboxes_to_page()
+            self.add_checkboxes_to_page_2()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при обновлении данных в базе данных: {e}")
 
