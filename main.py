@@ -4,6 +4,9 @@ import sys
 import sqlite3
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import Qt
+from PyQt5 import *
 import base64
 
 
@@ -31,24 +34,51 @@ class MainWindow(QMainWindow):
         self.layout_page_2.addWidget(self.scroll_area)
         self.add_checkboxes_to_page_2()
 
+
+    #
     def add_checkboxes_to_page_2(self):
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
-        self.layout_page_2.addWidget(self.scroll_area)
 
         try:
             cursor = self.con.cursor()
-            cursor.execute("SELECT id, name FROM serials")
+            cursor.execute("SELECT id, name, genre, country, year, seasons, episodes, pic FROM serials")
             serials = cursor.fetchall()
 
-            for serial_id, name in serials:
-                label = QLabel(f"{name} (ID: {serial_id})")
+            for serial_id, name, genre, country, year, seasons, episodes, pic in serials:
+                serial_widget = QWidget()
+                serial_layout = QHBoxLayout(serial_widget)
+
+                image_label = QLabel()
+                if pic is not None:
+                    image_data = base64.b64decode(pic)
+                else:
+                    with open('zat3.jpg', 'rb') as f:
+                        image_data = f.read()
+                pixmap = QPixmap()
+                pixmap.loadFromData(image_data)
+                image_label.setPixmap(pixmap.scaled(250, 400, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
+                serial_layout.addWidget(image_label)
+
+                # Добавляем информацию о сериале
+                info_layout = QVBoxLayout()
+
+                info_label = QLabel(f"Название: {name}\n"
+                                    f"Жанр: {genre}\n"
+                                    f"Страна: {country}\n"
+                                    f"Год: {year}\n"
+                                    f"Сезоны: {seasons}\n"
+                                    f"Эпизоды: {episodes}")
+                info_layout.addWidget(info_label)
+
+                # Добавляем чекбоксы
+                checkbox_layout = QVBoxLayout()
+
                 checkbox_planned = QCheckBox("Планирую посмотреть")
                 checkbox_watched = QCheckBox("Просмотрено")
                 checkbox_watching = QCheckBox("Смотрю")
-
 
                 checkbox_planned.serial_id = serial_id
                 checkbox_watched.serial_id = serial_id
@@ -65,10 +95,15 @@ class MainWindow(QMainWindow):
                 checkbox_watched.stateChanged.connect(self.checkbox_changed)
                 checkbox_watching.stateChanged.connect(self.checkbox_changed)
 
-                self.scroll_layout.addWidget(label)
-                self.scroll_layout.addWidget(checkbox_planned)
-                self.scroll_layout.addWidget(checkbox_watched)
-                self.scroll_layout.addWidget(checkbox_watching)
+                checkbox_layout.addWidget(checkbox_planned)
+                checkbox_layout.addWidget(checkbox_watched)
+                checkbox_layout.addWidget(checkbox_watching)
+
+                info_layout.addLayout(checkbox_layout)
+                serial_layout.addLayout(info_layout)
+                serial_widget.setLayout(serial_layout)
+
+                self.scroll_layout.addWidget(serial_widget)
 
         except sqlite3.Error as e:
             print("Произошла ошибка при получении данных из базы данных:", e)
@@ -76,7 +111,6 @@ class MainWindow(QMainWindow):
         finally:
             cursor.close()
 
-    #
     def checkbox_changed(self, state):
         checkbox = self.sender()
         serial_id = checkbox.serial_id
@@ -152,7 +186,7 @@ class MainWindow(QMainWindow):
     #settings
     def browse_files(self):
         file_dialog = QFileDialog()
-        file_dialog.setNameFilter("Images (*.jpg *.png *.webp)")
+        file_dialog.setNameFilter("Images (*.jpg *.png *.webp *.gif)")
         file_dialog.setViewMode(QFileDialog.List)
 
         if file_dialog.exec_():
@@ -210,13 +244,14 @@ class MainWindow(QMainWindow):
             new_year = self.lineEdit_5.text()
             new_country = self.lineEdit_6.text()
             new_score = self.horizontalSlider.value()
+            new_pic = self.encoded_image
 
             name = self.lineEdit.text()
 
             cursor.execute("""UPDATE serials
-                              SET genre = ?, episodes = ?, seasons = ?, year = ?, country = ?, score = ?
+                              SET genre = ?, episodes = ?, seasons = ?, year = ?, country = ?, score = ?, pic = ?
                               WHERE name = ?""",
-                           (new_genre[0][0], new_episodes, new_seasons, new_year, new_country, new_score, name))
+                           (new_genre[0][0], new_episodes, new_seasons, new_year, new_country, new_score, new_pic, name))
             self.con.commit()
 
             print(f"Запись с названием '{name}' успешно обновлена в базе данных!")
