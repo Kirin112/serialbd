@@ -160,7 +160,7 @@
        <bool>false</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_2"/>
       <widget class="QWidget" name="page_3"/>
@@ -273,14 +273,14 @@
           <item row="6" column="1">
            <widget class="QLineEdit" name="lineEdit_6"/>
           </item>
-          <item row="7" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="label_7">
             <property name="text">
              <string>Оценка</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="8" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QLabel" name="label_8">
@@ -307,13 +307,6 @@
             </item>
            </layout>
           </item>
-          <item row="8" column="1">
-           <widget class="QPushButton" name="pushButton">
-            <property name="text">
-             <string>Сохранить</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0" colspan="2">
            <widget class="QLabel" name="label_9">
             <property name="font">
@@ -329,7 +322,28 @@
             </property>
            </widget>
           </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Картинка</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="text">
+             <string>Выбрать</string>
+            </property>
+           </widget>
+          </item>
           <item row="9" column="1">
+           <widget class="QPushButton" name="pushButton">
+            <property name="text">
+             <string>Сохранить</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
            <widget class="QPushButton" name="pushButton_4">
             <property name="text">
              <string>Изменить</string>

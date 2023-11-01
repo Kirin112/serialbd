@@ -4,6 +4,7 @@ import sys
 import sqlite3
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
+import base64
 
 
 class MainWindow(QMainWindow):
@@ -11,9 +12,12 @@ class MainWindow(QMainWindow):
         super().__init__()
         loadUi('test.ui', self)
         self.con = sqlite3.connect('serial.sqlite')
+
+        #settings
         self.pushButton.clicked.connect(self.add_serial)
         self.pushButton_3.clicked.connect(self.delete_serial)
         self.pushButton_4.clicked.connect(self.update_serial)
+        self.pushButton_2.clicked.connect(self.browse_files)
 
         #list of serials
         self.show_serials()
@@ -146,15 +150,32 @@ class MainWindow(QMainWindow):
             cursor.close()
 
     #settings
+    def browse_files(self):
+        file_dialog = QFileDialog()
+        file_dialog.setNameFilter("Images (*.jpg *.png *.webp)")
+        file_dialog.setViewMode(QFileDialog.List)
+
+        if file_dialog.exec_():
+            selected_files = file_dialog.selectedFiles()
+            if selected_files:
+                file_path = selected_files[0]
+
+        with open(file_path, 'rb') as file:
+            image_data = file.read()
+
+        # Кодируем изображение в base64
+        self.encoded_image = base64.b64encode(image_data)
+
     def add_serial(self):
         try:
-
             cursor = self.con.cursor()
             result = cursor.execute("SELECT id FROM genres WHERE name = ?", (self.comboBox.currentText(),)).fetchall()
             cursor.execute("""INSERT INTO
-                                        serials (name, genre, episodes, seasons, year, country, score)
-                                        VALUES(?, ?, ?, ?, ?, ?, ?)""",
-                        (name := self.lineEdit.text(), genre := result[0][0], episodes := self.spinBox.text(), seasons := self.spinBox_2.text(), year := self.lineEdit_5.text(), country := self.lineEdit_6.text(), score := self.horizontalSlider.value())).fetchall()
+                                        serials (name, genre, episodes, seasons, year, country, score, pic)
+                                        VALUES(?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (name := self.lineEdit.text(), genre := result[0][0], episodes := self.spinBox.text(),
+                         seasons := self.spinBox_2.text(), year := self.lineEdit_5.text(), country := self.lineEdit_6.text(),
+                         score := self.horizontalSlider.value(),pic := self.encoded_image)).fetchall()
             self.con.commit()
             print("Данные успешно добавлены в базу данных!")
             QMessageBox.information(self, "Успех", "Данные успешно добавлены в базу данных!")
