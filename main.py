@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt
-from PyQt5 import *
 import base64
 
 
@@ -46,6 +45,16 @@ class MainWindow(QMainWindow):
         self.scroll_layout_3 = QVBoxLayout(self.scroll_widget_3)
         self.add_checkboxes_to_page_3()
 
+        #watched
+        self.page_5 = self.stackedWidget.findChild(QWidget, 'page_5')
+        self.layout_page_5 = QVBoxLayout(self.page_5)
+        self.scroll_area_5 = QScrollArea(self.page_5)
+        self.scroll_area_5.setWidgetResizable(True)
+        self.scroll_widget_5 = QWidget()
+        self.scroll_area_5.setWidget(self.scroll_widget_5)
+        self.layout_page_5.addWidget(self.scroll_area_5)
+        self.scroll_layout_5 = QVBoxLayout(self.scroll_widget_5)
+        self.add_checkboxes_to_page_5()
 
 
     #
@@ -144,7 +153,10 @@ class MainWindow(QMainWindow):
                 self.remove_from_table('watched', serial_id)
             elif checkbox.text() == "Смотрю":
                 self.remove_from_table('watching', serial_id)
+
+        self.add_checkboxes_to_page_2()
         self.add_checkboxes_to_page_3()
+        self.add_checkboxes_to_page_5()
 
     def is_serial_in_planned(self, serial_id):
         try:
@@ -226,7 +238,7 @@ class MainWindow(QMainWindow):
                 serial_layout.addWidget(image_label)
                 result = cursor.execute("SELECT name FROM genres WHERE id = ?",
                                         (genre,)).fetchall()
-                # Добавляем информацию о сериале
+
                 info_layout = QVBoxLayout()
 
                 info_label = QLabel(f"Название: {name}\n"
@@ -237,7 +249,6 @@ class MainWindow(QMainWindow):
                                     f"Эпизоды: {episodes}")
                 info_layout.addWidget(info_label)
 
-                # Добавляем чекбоксы
                 checkbox_layout = QVBoxLayout()
 
                 checkbox_planned = QCheckBox("Планирую посмотреть")
@@ -268,6 +279,81 @@ class MainWindow(QMainWindow):
                 serial_widget.setLayout(serial_layout)
 
                 self.scroll_layout_3.addWidget(serial_widget)
+
+        except sqlite3.Error as e:
+            print("Произошла ошибка при получении данных из базы данных:", e)
+
+        finally:
+            cursor.close()
+
+    def add_checkboxes_to_page_5(self):
+        for i in reversed(range(self.scroll_layout_5.count())):
+            widget = self.scroll_layout_5.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        try:
+            cursor = self.con.cursor()
+            cursor.execute("SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic FROM serials INNER JOIN watched ON serials.id = watched.idSerial")
+            serials = cursor.fetchall()
+
+            for serial_id, name, genre, country, year, seasons, episodes, pic in serials:
+                serial_widget = QWidget()
+                serial_layout = QHBoxLayout(serial_widget)
+
+                image_label = QLabel()
+                if pic is not None:
+                    image_data = base64.b64decode(pic)
+                else:
+                    with open('zat3.jpg', 'rb') as f:
+                        image_data = f.read()
+                pixmap = QPixmap()
+                pixmap.loadFromData(image_data)
+                image_label.setPixmap(pixmap)
+                serial_layout.addWidget(image_label)
+                result = cursor.execute("SELECT name FROM genres WHERE id = ?",
+                                        (genre,)).fetchall()
+
+                info_layout = QVBoxLayout()
+
+                info_label = QLabel(f"Название: {name}\n"
+                                    f"Жанр: {result[0][0]}\n"
+                                    f"Страна: {country}\n"
+                                    f"Год: {year}\n"
+                                    f"Сезоны: {seasons}\n"
+                                    f"Эпизоды: {episodes}")
+                info_layout.addWidget(info_label)
+
+                checkbox_layout = QVBoxLayout()
+
+                checkbox_planned = QCheckBox("Планирую посмотреть")
+                checkbox_watched = QCheckBox("Просмотрено")
+                checkbox_watching = QCheckBox("Смотрю")
+
+                checkbox_planned.serial_id = serial_id
+                checkbox_watched.serial_id = serial_id
+                checkbox_watching.serial_id = serial_id
+
+                if self.is_serial_in_planned(serial_id):
+                    checkbox_planned.setChecked(True)
+                if self.is_serial_in_watched(serial_id):
+                    checkbox_watched.setChecked(True)
+                if self.is_serial_in_watching(serial_id):
+                    checkbox_watching.setChecked(True)
+
+                checkbox_planned.stateChanged.connect(self.checkbox_changed)
+                checkbox_watched.stateChanged.connect(self.checkbox_changed)
+                checkbox_watching.stateChanged.connect(self.checkbox_changed)
+
+                checkbox_layout.addWidget(checkbox_planned)
+                checkbox_layout.addWidget(checkbox_watched)
+                checkbox_layout.addWidget(checkbox_watching)
+
+                info_layout.addLayout(checkbox_layout)
+                serial_layout.addLayout(info_layout)
+                serial_widget.setLayout(serial_layout)
+
+                self.scroll_layout_5.addWidget(serial_widget)
 
         except sqlite3.Error as e:
             print("Произошла ошибка при получении данных из базы данных:", e)
@@ -307,7 +393,6 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Успех", "Данные успешно добавлены в базу данных!")
             self.show_serials()
             self.add_checkboxes_to_page_2()
-            self.add_checkboxes_to_page_3()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при добавлении данных в базу данных: {e}")
         finally:
@@ -323,7 +408,6 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Успех", f"Запись с названием '{name}' успешно удалена из базы данных!")
             self.show_serials()
             self.add_checkboxes_to_page_2()
-            self.add_checkboxes_to_page_3()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при удалении данных из базы данных: {e}")
         finally:
@@ -352,7 +436,6 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Успех", f"Запись с названием '{name}' успешно обновлена в базе данных!")
             self.show_serials()
             self.add_checkboxes_to_page_2()
-            self.add_checkboxes_to_page_3()
         except sqlite3.Error as e:
             QMessageBox.critical(self, "Ошибка", f"Произошла ошибка при обновлении данных в базе данных: {e}")
 

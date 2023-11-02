@@ -204,7 +204,7 @@
        <bool>false</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_2">
        <widget class="QLabel" name="label_12">
@@ -236,7 +236,21 @@
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="page_5"/>
+      <widget class="QWidget" name="page_5">
+       <widget class="QLabel" name="label_13">
+        <property name="geometry">
+         <rect>
+          <x>90</x>
+          <y>50</y>
+          <width>55</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Просмотренно</string>
+        </property>
+       </widget>
+      </widget>
       <widget class="QWidget" name="page_4"/>
       <widget class="QWidget" name="page">
        <property name="contextMenuPolicy">
@@ -516,12 +530,12 @@
    <slot>setNum(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>636</x>
-     <y>354</y>
+     <x>680</x>
+     <y>376</y>
     </hint>
     <hint type="destinationlabel">
-     <x>363</x>
-     <y>377</y>
+     <x>389</x>
+     <y>402</y>
     </hint>
    </hints>
   </connection>
