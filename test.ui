@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1112</width>
-    <height>665</height>
+    <width>1116</width>
+    <height>674</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,6 +106,50 @@
       </item>
       <item>
        <property name="text">
+        <string>Смотрю</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+       <property name="background">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>0</red>
+          <green>171</green>
+          <blue>228</blue>
+         </color>
+        </brush>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Просмотрено</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
+       <property name="textAlignment">
+        <set>AlignCenter</set>
+       </property>
+       <property name="background">
+        <brush brushstyle="SolidPattern">
+         <color alpha="255">
+          <red>0</red>
+          <green>171</green>
+          <blue>228</blue>
+         </color>
+        </brush>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Запланировано</string>
        </property>
        <property name="font">
@@ -160,10 +204,40 @@
        <bool>false</bool>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
-      <widget class="QWidget" name="page_2"/>
-      <widget class="QWidget" name="page_3"/>
+      <widget class="QWidget" name="page_2">
+       <widget class="QLabel" name="label_12">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>30</y>
+          <width>55</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Список</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_3">
+       <widget class="QLabel" name="label_11">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>10</y>
+          <width>55</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Смотрю</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="page_5"/>
+      <widget class="QWidget" name="page_4"/>
       <widget class="QWidget" name="page">
        <property name="contextMenuPolicy">
         <enum>Qt::NoContextMenu</enum>
@@ -403,8 +477,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1112</width>
-     <height>26</height>
+     <width>1116</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>
