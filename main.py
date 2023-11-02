@@ -61,12 +61,13 @@ class MainWindow(QMainWindow):
                 pixmap.loadFromData(image_data)
                 image_label.setPixmap(pixmap.scaled(200, 400, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio))
                 serial_layout.addWidget(image_label)
-
+                result = cursor.execute("SELECT name FROM genres WHERE id = ?",
+                                        (genre,)).fetchall()
                 # Добавляем информацию о сериале
                 info_layout = QVBoxLayout()
 
                 info_label = QLabel(f"Название: {name}\n"
-                                    f"Жанр: {genre}\n"
+                                    f"Жанр: {result[0][0]}\n"
                                     f"Страна: {country}\n"
                                     f"Год: {year}\n"
                                     f"Сезоны: {seasons}\n"
