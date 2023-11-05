@@ -142,10 +142,29 @@ class MainWindow(QMainWindow):
 
                 if self.is_serial_in_planned(serial_id):
                     checkbox_planned.setChecked(True)
-                if self.is_serial_in_watched(serial_id):
-                    checkbox_watched.setChecked(True)
-                if self.is_serial_in_watching(serial_id):
-                    checkbox_watching.setChecked(True)
+                    checkbox_watched.setEnabled(False)
+                    checkbox_watching.setEnabled(False)
+                else:
+                    checkbox_watched.setEnabled(True)
+                    checkbox_watching.setEnabled(True)
+                    if self.is_serial_in_watched(serial_id):
+                        checkbox_watched.setChecked(True)
+                        checkbox_planned.setEnabled(False)
+                        checkbox_watching.setEnabled(False)
+                    else:
+                        checkbox_planned.setEnabled(True)
+                        checkbox_watching.setEnabled(True)
+                        if self.is_serial_in_watching(serial_id):
+                            checkbox_watching.setChecked(True)
+                            checkbox_watched.setEnabled(False)
+                            checkbox_planned.setEnabled(False)
+                        else:
+                            checkbox_watched.setEnabled(True)
+                            checkbox_planned.setEnabled(True)
+
+
+
+
 
                 checkbox_planned.stateChanged.connect(self.checkbox_changed)
                 checkbox_watched.stateChanged.connect(self.checkbox_changed)
@@ -192,8 +211,6 @@ class MainWindow(QMainWindow):
         self.add_checkboxes_to_page_3()
         self.add_checkboxes_to_page_4()
         self.add_checkboxes_to_page_5()
-
-
 
     def is_serial_in_planned(self, serial_id):
         try:
@@ -303,10 +320,16 @@ class MainWindow(QMainWindow):
 
                 if self.is_serial_in_planned(serial_id):
                     checkbox_planned.setChecked(True)
+                    checkbox_watched.setCheckable(False)
+                    checkbox_watching.setCheckable(False)
                 if self.is_serial_in_watched(serial_id):
                     checkbox_watched.setChecked(True)
+                    checkbox_planned.setCheckable(False)
+                    checkbox_watching.setCheckable(False)
                 if self.is_serial_in_watching(serial_id):
                     checkbox_watching.setChecked(True)
+                    checkbox_watched.setCheckable(False)
+                    checkbox_planned.setCheckable(False)
 
                 checkbox_planned.stateChanged.connect(self.checkbox_changed)
                 checkbox_watched.stateChanged.connect(self.checkbox_changed)
@@ -444,29 +467,9 @@ class MainWindow(QMainWindow):
 
                 checkbox_layout = QVBoxLayout()
 
-                checkbox_planned = QCheckBox("Планирую посмотреть")
-                checkbox_watched = QCheckBox("Просмотрено")
-                checkbox_watching = QCheckBox("Смотрю")
-
-                checkbox_planned.serial_id = serial_id
-                checkbox_watched.serial_id = serial_id
-                checkbox_watching.serial_id = serial_id
-
-                if self.is_serial_in_planned(serial_id):
-                    checkbox_planned.setChecked(True)
-                if self.is_serial_in_watched(serial_id):
-                    checkbox_watched.setChecked(True)
-                if self.is_serial_in_watching(serial_id):
-                    checkbox_watching.setChecked(True)
-
-                checkbox_planned.stateChanged.connect(self.checkbox_changed)
-                checkbox_watched.stateChanged.connect(self.checkbox_changed)
-                checkbox_watching.stateChanged.connect(self.checkbox_changed)
-
-                checkbox_layout.addWidget(checkbox_planned)
-                checkbox_layout.addWidget(checkbox_watched)
-                checkbox_layout.addWidget(checkbox_watching)
-
+                start_watching = QPushButton("Начать просмотр")
+                start_watching.clicked.connect(lambda: self.start(serial_id))
+                checkbox_layout.addWidget(start_watching)
                 info_layout.addLayout(checkbox_layout)
                 serial_layout.addLayout(info_layout)
                 serial_widget.setLayout(serial_layout)
@@ -478,6 +481,13 @@ class MainWindow(QMainWindow):
 
         finally:
             cursor.close()
+
+    def start(self, serialid):
+        self.remove_from_table('planned', serialid)
+        self.add_to_table('watching', serialid)
+        self.add_checkboxes_to_page_3()
+        self.add_checkboxes_to_page_4()
+        self.add_checkboxes_to_page_2()
 
     #settings
     def browse_files(self):
@@ -581,8 +591,6 @@ class MainWindow(QMainWindow):
 
         finally:
             cursor.close()
-
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
