@@ -9,7 +9,32 @@ from PyQt5.QtCore import Qt
 import base64
 
 
+class PlanDialog(QDialog):
+    def __init__(self, serial_id, parent=None):
+        super().__init__(parent)
+        self.serial_id = serial_id
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle('Запланировать просмотр')
+        layout = QVBoxLayout()
+        self.calendar_widget = QCalendarWidget()
+        self.plan_button = QPushButton("Запланировать")
+        self.plan_button.clicked.connect(self.plan_serial)
+        layout.addWidget(self.calendar_widget)
+        layout.addWidget(self.plan_button)
+        self.setLayout(layout)
+
+    def plan_serial(self):
+        selected_date = self.calendar_widget.selectedDate()
+        if selected_date.isValid():
+            planned_date = selected_date.toString("yyyy-MM-dd")
+            self.parent().add_to_table('planned', self.serial_id, planned_date)
+            self.accept()
+
+
 class MainWindow(QMainWindow):
+
     def __init__(self):
         super().__init__()
         loadUi('test.ui', self)
@@ -68,7 +93,6 @@ class MainWindow(QMainWindow):
         self.add_checkboxes_to_page_4()
 
 
-    #
     def add_checkboxes_to_page_2(self):
         for i in reversed(range(self.scroll_layout.count())):
             widget = self.scroll_layout.itemAt(i).widget()
@@ -96,7 +120,6 @@ class MainWindow(QMainWindow):
                 serial_layout.addWidget(image_label)
                 result = cursor.execute("SELECT name FROM genres WHERE id = ?",
                                         (genre,)).fetchall()
-                # Добавляем информацию о сериале
                 info_layout = QVBoxLayout()
 
                 info_label = QLabel(f"Название: {name}\n"
@@ -107,7 +130,6 @@ class MainWindow(QMainWindow):
                                     f"Эпизоды: {episodes}")
                 info_layout.addWidget(info_label)
 
-                # Добавляем чекбоксы
                 checkbox_layout = QVBoxLayout()
 
                 checkbox_planned = QCheckBox("Планирую посмотреть")
@@ -152,7 +174,8 @@ class MainWindow(QMainWindow):
 
         if checkbox.isChecked():
             if checkbox.text() == "Планирую посмотреть":
-                self.add_to_table('planned', serial_id)
+                dialog = PlanDialog(serial_id, parent=self)
+                dialog.exec_()
             elif checkbox.text() == "Просмотрено":
                 self.add_to_table('watched', serial_id)
             elif checkbox.text() == "Смотрю":
@@ -169,6 +192,8 @@ class MainWindow(QMainWindow):
         self.add_checkboxes_to_page_3()
         self.add_checkboxes_to_page_4()
         self.add_checkboxes_to_page_5()
+
+
 
     def is_serial_in_planned(self, serial_id):
         try:
@@ -203,10 +228,14 @@ class MainWindow(QMainWindow):
         finally:
             cursor.close()
 
-    def add_to_table(self, table_name, serial_id):
+    def add_to_table(self, table_name, serial_id, date=None):
         try:
             cursor = self.con.cursor()
-            cursor.execute(f"INSERT INTO {table_name} (idSerial) VALUES (?)", (idSerial := serial_id,))
+            print(table_name)
+            if table_name == "planned":
+                cursor.execute(f"INSERT INTO {table_name} (idSerial, date) VALUES (?, ?)", (idSerial := serial_id, date := date))
+            else:
+                cursor.execute(f"INSERT INTO {table_name} (idSerial) VALUES (?)", (idSerial := serial_id,))
             self.con.commit()
         except sqlite3.Error as e:
             print(f"Произошла ошибка при добавлении в таблицу {table_name}: {e}")
@@ -223,7 +252,7 @@ class MainWindow(QMainWindow):
         finally:
             cursor.close()
 
-    def add_checkboxes_to_page_3(self):
+    def add_checkboxes_to_page_3(self):  #watching
         for i in reversed(range(self.scroll_layout_3.count())):
             widget = self.scroll_layout_3.itemAt(i).widget()
             if widget is not None:
@@ -271,6 +300,7 @@ class MainWindow(QMainWindow):
                 checkbox_watched.serial_id = serial_id
                 checkbox_watching.serial_id = serial_id
 
+
                 if self.is_serial_in_planned(serial_id):
                     checkbox_planned.setChecked(True)
                 if self.is_serial_in_watched(serial_id):
@@ -298,7 +328,7 @@ class MainWindow(QMainWindow):
         finally:
             cursor.close()
 
-    def add_checkboxes_to_page_5(self):
+    def add_checkboxes_to_page_5(self): #watched
         for i in reversed(range(self.scroll_layout_5.count())):
             widget = self.scroll_layout_5.itemAt(i).widget()
             if widget is not None:
@@ -373,7 +403,7 @@ class MainWindow(QMainWindow):
         finally:
             cursor.close()
 
-    def add_checkboxes_to_page_4(self):
+    def add_checkboxes_to_page_4(self): #planned
         for i in reversed(range(self.scroll_layout_4.count())):
             widget = self.scroll_layout_4.itemAt(i).widget()
             if widget is not None:
@@ -381,10 +411,10 @@ class MainWindow(QMainWindow):
 
         try:
             cursor = self.con.cursor()
-            cursor.execute("SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic FROM serials INNER JOIN planned ON serials.id = planned.idSerial")
+            cursor.execute("SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic, planned.date FROM serials INNER JOIN planned ON serials.id = planned.idSerial")
             serials = cursor.fetchall()
 
-            for serial_id, name, genre, country, year, seasons, episodes, pic in serials:
+            for serial_id, name, genre, country, year, seasons, episodes, pic, date in serials:
                 serial_widget = QWidget()
                 serial_layout = QHBoxLayout(serial_widget)
 
@@ -408,7 +438,8 @@ class MainWindow(QMainWindow):
                                     f"Страна: {country}\n"
                                     f"Год: {year}\n"
                                     f"Сезоны: {seasons}\n"
-                                    f"Эпизоды: {episodes}")
+                                    f"Эпизоды: {episodes}\n"
+                                    f"План: {date}")
                 info_layout.addWidget(info_label)
 
                 checkbox_layout = QVBoxLayout()
@@ -459,11 +490,11 @@ class MainWindow(QMainWindow):
             if selected_files:
                 file_path = selected_files[0]
 
-        with open(file_path, 'rb') as file:
-            image_data = file.read()
+            with open(file_path, 'rb') as file:
+                image_data = file.read()
 
         # Кодируем изображение в base64
-        self.encoded_image = base64.b64encode(image_data)
+            self.encoded_image = base64.b64encode(image_data)
 
     def add_serial(self):
         try:
@@ -550,6 +581,7 @@ class MainWindow(QMainWindow):
 
         finally:
             cursor.close()
+
 
 
 if __name__ == '__main__':
