@@ -5,7 +5,7 @@ import sqlite3
 from PyQt5.QtWidgets import *
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import Qt
+from docx import Document
 import base64
 
 
@@ -46,6 +46,7 @@ class MainWindow(QMainWindow):
         self.pushButton_3.clicked.connect(self.delete_serial)
         self.pushButton_4.clicked.connect(self.update_serial)
         self.pushButton_2.clicked.connect(self.browse_files)
+        self.pushButton_5.clicked.connect(self.filec)
 
         #list of serials
         self.show_serials()
@@ -162,10 +163,6 @@ class MainWindow(QMainWindow):
                             checkbox_watched.setEnabled(True)
                             checkbox_planned.setEnabled(True)
 
-
-
-
-
                 checkbox_planned.stateChanged.connect(self.checkbox_changed)
                 checkbox_watched.stateChanged.connect(self.checkbox_changed)
                 checkbox_watching.stateChanged.connect(self.checkbox_changed)
@@ -274,7 +271,7 @@ class MainWindow(QMainWindow):
             widget = self.scroll_layout_3.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
-
+        self.scroll_layout_3.addWidget(self.pushButton_5)
         try:
             cursor = self.con.cursor()
             cursor.execute("SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic FROM serials INNER JOIN watching ON serials.id = watching.idSerial")
@@ -345,6 +342,7 @@ class MainWindow(QMainWindow):
 
                 self.scroll_layout_3.addWidget(serial_widget)
 
+
         except sqlite3.Error as e:
             print("Произошла ошибка при получении данных из базы данных:", e)
 
@@ -356,7 +354,7 @@ class MainWindow(QMainWindow):
             widget = self.scroll_layout_5.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
-
+        self.scroll_layout_5.addWidget(self.pushButton_5)
         try:
             cursor = self.con.cursor()
             cursor.execute("SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic FROM serials INNER JOIN watched ON serials.id = watched.idSerial")
@@ -431,7 +429,7 @@ class MainWindow(QMainWindow):
             widget = self.scroll_layout_4.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
-
+        self.scroll_layout_4.addWidget(self.pushButton_5)
         try:
             cursor = self.con.cursor()
             cursor.execute("SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic, planned.date FROM serials INNER JOIN planned ON serials.id = planned.idSerial")
@@ -488,6 +486,24 @@ class MainWindow(QMainWindow):
         self.add_checkboxes_to_page_3()
         self.add_checkboxes_to_page_4()
         self.add_checkboxes_to_page_2()
+
+
+
+    def filec(self):
+        document = Document()
+        document.add_heading('Запланированно')
+        cursor = self.con.cursor()
+        cursor.execute(
+            "SELECT serials.id, serials.name, serials.genre, serials.country, serials.year, serials.seasons, serials.episodes, serials.pic, planned.date FROM serials INNER JOIN planned ON serials.id = planned.idSerial")
+        serials = cursor.fetchall()
+
+        for serial_id, name, genre, country, year, seasons, episodes, pic, date in serials:
+            result = cursor.execute("SELECT name FROM genres WHERE id = ?",
+                                    (genre,)).fetchall()
+            text_to_save = f"{name}: {result[0][0]}, {country}, {year}, {seasons}, {episodes}, {date} \n"
+            document.add_paragraph(text_to_save)
+        document.save('output.docx')
+
 
     #settings
     def browse_files(self):
